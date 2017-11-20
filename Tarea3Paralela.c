@@ -104,7 +104,7 @@ if(rank > 0){
 MPI_Finalize();
 
 printf("La suma de todos los perimetros de los triangulos es %f\n",perimetro_total);
-/* La suma de todos los perimetros de los triangulos es 37855.906250 */
+/* La suma de todos los perimetros de los triangulos es 37855.906250 ----- resultado que debiera dar*/
 
 return 0;
 }
