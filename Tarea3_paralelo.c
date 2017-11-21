@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-void buscarpuntos(int triangulo, char fichero[], float puntos[1]){
+void buscarpuntos(int triangulo, char fichero[], float puntos[2]){
     int lado;
     float x, y;
     FILE *datos=fopen(fichero,"r");
@@ -23,7 +23,7 @@ void buscarpuntos(int triangulo, char fichero[], float puntos[1]){
 float calculardistancia(){}
 
     
-void buscartriangulo(char fichero[], int posicion, int triangulo[2])
+void buscartriangulo(char fichero[], int posicion, int triangulo[3])
 {
 
     FILE *datos = fopen(fichero,"r");
