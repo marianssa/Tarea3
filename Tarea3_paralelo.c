@@ -23,7 +23,7 @@ void buscarpuntos(int triangulo, char fichero[], float puntos[2]){
 
 
 
-	
+    
 void buscartriangulo(char fichero[],int posicion, int triangulo[3])
 {
 
