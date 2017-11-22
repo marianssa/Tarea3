@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-void buscarpuntos(int triangulo, char fichero[], float puntos[1]){
-    int lado;
+void buscarpuntos(int triangulo, char fichero[], float puntos[2]){
+    int lado=0;
     float x, y;
     FILE *datos=fopen(fichero,"r");
     while(!feof(datos)){
@@ -17,34 +17,39 @@ void buscarpuntos(int triangulo, char fichero[], float puntos[1]){
             break;
         }
     }
+    fclose(datos);
 
 }
 
-float calculardistancia(){}
+
 
 	
-void buscartriangulo(char fichero[], int posicion, int triangulo[2])
+void buscartriangulo(char fichero[],int posicion, int triangulo[3])
 {
 
     FILE *datos = fopen(fichero,"r");
-    fseek(datos,posicion,0);//se ubica en la posicion dada dentro del archivo.
+    fseek(datos,posicion,SEEK_CUR);//se ubica en la posicion dada dentro del archivo.
     fscanf(datos,"%d %d %d\n",&triangulo[0],&triangulo[1],&triangulo[2]);
     posicion=ftell(datos);//guarda la ultima ubicacion leida del archivo bytes
+    fclose(datos);
 }
-int main(int argc, char **argv)
+int main(int argc, char* argv[])
 {
     int rank, tamano;
-    FILE *triangulos =fopen("triangulos","r");
+    int triangulo[3]={0,0,0};
+    buscartriangulo("triangulos",0,triangulo);
 
  
    /* MPI_Init(&argc,&argv);
-    MPI_Comm_size( MPI_COMM_WORLD, &numprocs ); // devuelve el numero de procesos en este COMM_WORLD
-    MPI_Comm_rank( MPI_COMM_WORLD, &myid );     // identificate por el myid asignado  
+    MPI_Comm_size( MPI_COMM_WORLD, &tamano ); // devuelve el numero de procesos en este COMM_WORLD
+    MPI_Comm_rank( MPI_COMM_WORLD, &rank );     // identificate por el myid asignado  
  
     if(rank == 0)
     {
 
 
     }
-    */
+ 
+   */
+    
 }
