@@ -31,7 +31,7 @@ void buscarpuntos(int triangulo, char fichero[], float puntos[2]){
 
 
     
-void buscartriangulo(char fichero[],int posicion, int triangulo[3])
+int buscartriangulo(char fichero[],int posicion, int triangulo[3])
 {
 
     FILE *datos = fopen(fichero,"r");
@@ -41,6 +41,7 @@ void buscartriangulo(char fichero[],int posicion, int triangulo[3])
     posicion=ftell(datos);//guarda la ultima ubicacion leida del archivo bytes
 }
     fclose(datos);
+    return posicion;
 }
 
 float calcularperimetro (float puntos1[2],float puntos2[2],float puntos3[2])
@@ -65,23 +66,21 @@ int main(int argc, char* argv[])
     int posicion=0;
     float perimetro;
     float perimetrototal;
-    int n=0;
    
    MPI_Init(&argc,&argv);
     MPI_Comm_size( MPI_COMM_WORLD, &tamano ); // devuelve el numero de procesos en este COMM_WORLD
     MPI_Comm_rank( MPI_COMM_WORLD, &rank );     // identificate por el myid asignado  
- 
+
+           
     if(rank == 0)
     {
-        while(n<9665)
-        {
-           for(int fuente=1;fuente<tamano;fuente++)
+        for(int fuente=1;fuente<tamano;fuente++)
             {
-                buscartriangulo("triangulos",posicion,triangulo);
-                n++;
+                posicion=buscartriangulo("triangulos",posicion,triangulo);
+            
                 status = MPI_Send(triangulo,3, MPI_INT,fuente,0, MPI_COMM_WORLD);
             }
-        }
+        
 
     }
 
@@ -99,8 +98,8 @@ int main(int argc, char* argv[])
                     buscarpuntos(triangulo[i],"puntos",puntos3);
                 }
                 perimetro=calcularperimetro(puntos1,puntos2,puntos3);
-                printf("%f\n",perimetro );
-                MPI_Reduce(&perimetro,&perimetrototal,1,MPI_INT,MPI_SUM,0,MPI_COMM_WORLD);
+                printf("%f\n",perimetrototal );
+                MPI_Reduce(&perimetro,&perimetrototal,1,MPI_FLOAT,MPI_SUM,0,MPI_COMM_WORLD);
     }
     
 
