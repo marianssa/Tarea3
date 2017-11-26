@@ -97,26 +97,29 @@ int main(int argc, char* argv[])
     if(rank == 0)
     {
 
-         if(cantidad_triangulos%tamano==0){
-        triangulosporprocesador=cantidad_triangulos/tamano;
-        aux1=(int)triangulosporprocesador;
-    }
-    else{
-        triangulosporprocesador=cantidad_triangulos/tamano;
-
-        triangulos_faltantes=(cantidad_triangulos%tamano)*tamano;
-        aux2=(int)triangulos_faltantes;
-    }
+        if(cantidad_triangulos%tamano==0)
+        {
+            triangulosporprocesador=cantidad_triangulos/tamano;
+            aux1=(int)triangulosporprocesador;
+        }
+        else
+        {
+            triangulosporprocesador=cantidad_triangulos/tamano;
+            aux1=(int)triangulosporprocesador;
+            triangulos_faltantes=(cantidad_triangulos%tamano);
+            aux2=(int)triangulos_faltantes;
+        }
 
     
-        for(int i=1;i<=triangulosporprocesador;i++){
+        for(int i=1;i<=triangulosporprocesador+aux2;i++)
+        {
             perimetro=buscartriangulo("triangulo",i,triangulo,perimetro);
             MPI_Reduce(&perimetro,&perimetrototal,1,MPI_FLOAT,MPI_SUM,0,MPI_COMM_WORLD);
         }
         for(int fuente=1;fuente<tamano;fuente++)
             {  
-                status = MPI_Send(aux1,buffsize, MPI_INT,fuente,0, MPI_COMM_WORLD);
-                status1 = MPI_Send(aux2,buffsize, MPI_INT,fuente,0, MPI_COMM_WORLD);
+                status = MPI_Send(&aux1,5, MPI_INT,fuente,0, MPI_COMM_WORLD);
+                status1 = MPI_Send(&aux2,4, MPI_INT,fuente,0, MPI_COMM_WORLD);
             }
        
         printf("%f\n",perimetrototal);
@@ -126,17 +129,9 @@ int main(int argc, char* argv[])
     if (rank > 0) 
     {
      
-         status = MPI_Recv(&aux1,buffsize, MPI_INT,0,MPI_ANY_TAG, MPI_COMM_WORLD,&rec_stat);
-         status1=MPI_Recv(&aux2,buffsize, MPI_INT,0,MPI_ANY_TAG, MPI_COMM_WORLD,&rec_stat);
-         if (rank == 1)
-         {
-          for(int i =aux1*rank;i<=aux1*rank+aux1+aux2;i++)
-          {
-                perimetro=buscartriangulo("triangulo",i,triangulo,perimetro);
-                MPI_Reduce(&perimetro,&perimetrototal,1,MPI_FLOAT,MPI_SUM,0,MPI_COMM_WORLD);
-          }  
-         }
-         for(int i =aux1*rank;i<=aux1*rank+aux1;i++)
+         status = MPI_Recv(&aux1,5, MPI_INT,0,MPI_ANY_TAG, MPI_COMM_WORLD,&rec_stat);
+         status1=MPI_Recv(&aux2,4,MPI_INT,0,MPI_ANY_TAG, MPI_COMM_WORLD,&rec_stat);
+         for(int i =aux1*rank+aux2+1;i<=aux1*rank+aux1+aux2;i++)
             {
                     
                 perimetro=buscartriangulo("triangulo",i,triangulo,perimetro);
