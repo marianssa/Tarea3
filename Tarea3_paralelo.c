@@ -34,7 +34,6 @@ int buscarlinea(char fichero[], int linea_buscada)
     fclose(datos);
     return posicion;
 
-
 }
 void buscarpuntos(int triangulo, char fichero[], float puntos[2]){
     int lado;
@@ -54,13 +53,15 @@ void buscarpuntos(int triangulo, char fichero[], float puntos[2]){
 
 
     
-float buscartriangulo(char fichero[],int linea, int triangulo[3], float perimetro)
+float buscartriangulo(char fichero[],int linea, int triangulo[3])
 {
-
+    float perimetro;
     float puntos1[2];
     float puntos2[2];
     float puntos3[2];
     FILE *datos = fopen(fichero,"r");
+
+    if(!feof(datos)){
     int posicion;
     posicion=buscarlinea("triangulos",linea); 
     // aqui yo me ubico en la linea que deseo del fichero.
@@ -72,77 +73,72 @@ float buscartriangulo(char fichero[],int linea, int triangulo[3], float perimetr
     perimetro=calcularperimetro(puntos1,puntos2,puntos3);        
 
     fclose(datos);
-
     return perimetro;
+}
+    else
+        return 0;
 }
 
 int main(int argc, char* argv[])
 {
-    int rank, tamano, status,status1;
-    MPI_Status  rec_stat;
-    int triangulo[3];
-    int aux1;
-    int aux2;
-    int posicion=0;
-    float perimetro;
-    float perimetrototal,triangulos_faltantes;
-    float triangulosporprocesador;
+    int rank, tamano;
+    int triangulo[3]={0,0,0};
+    int aux1=0;
+    int aux2=0;
+    float perimetro,
+        perimetrototal;
  
-   int buffsize=atoi(argv[1]);
+  
    MPI_Init(&argc,&argv);
     MPI_Comm_size( MPI_COMM_WORLD, &tamano ); // devuelve el numero de procesos en este COMM_WORLD
     MPI_Comm_rank( MPI_COMM_WORLD, &rank );     // identificate por el rank asignado  
-
+//inicializando variables.
+    perimetro=0;
+    perimetrototal=0;
+    float aux=0;
+    if(cantidad_triangulos%tamano==0)
+        {
+    
+            aux1=cantidad_triangulos/tamano;
+        }
+    else
+        {
+            
+           aux1=cantidad_triangulos/tamano;
+           aux2=cantidad_triangulos%tamano;
+        }
 
     if(rank == 0)
     {
-
-        if(cantidad_triangulos%tamano==0)
+        
+        //2417
+        for(int i=1;i<=aux1+aux2;i++)
         {
-            triangulosporprocesador=cantidad_triangulos/tamano;
-            aux1=(int)triangulosporprocesador;
-        }
-        else
-        {
-            triangulosporprocesador=cantidad_triangulos/tamano;
-            aux1=(int)triangulosporprocesador;
-            triangulos_faltantes=(cantidad_triangulos%tamano);
-            aux2=(int)triangulos_faltantes;
+            perimetro=buscartriangulo("triangulos",i,triangulo);
+            aux=perimetro+aux;
+            printf("procesador : %d numero de linea %d= %f\n",rank,i,perimetro);
+        
+            
         }
 
-    
-        for(int i=1;i<=triangulosporprocesador+aux2;i++)
-        {
-            perimetro=buscartriangulo("triangulo",i,triangulo,perimetro);
-            MPI_Reduce(&perimetro,&perimetrototal,1,MPI_FLOAT,MPI_SUM,0,MPI_COMM_WORLD);
-        }
-        for(int fuente=1;fuente<tamano;fuente++)
-            {  
-                status = MPI_Send(&aux1,5, MPI_INT,fuente,0, MPI_COMM_WORLD);
-                status1 = MPI_Send(&aux2,4, MPI_INT,fuente,0, MPI_COMM_WORLD);
-            }
-       
+         MPI_Reduce(&aux,&perimetrototal,1,MPI_REAL,MPI_SUM,0,MPI_COMM_WORLD);
+        
         printf("%f\n",perimetrototal);
-}  
-    
+    }  
 
-    if (rank > 0) 
+ else
     {
-     
-         status = MPI_Recv(&aux1,5, MPI_INT,0,MPI_ANY_TAG, MPI_COMM_WORLD,&rec_stat);
-         status1=MPI_Recv(&aux2,4,MPI_INT,0,MPI_ANY_TAG, MPI_COMM_WORLD,&rec_stat);
+        
          for(int i =aux1*rank+aux2+1;i<=aux1*rank+aux1+aux2;i++)
             {
-                    
-                perimetro=buscartriangulo("triangulo",i,triangulo,perimetro);
-                MPI_Reduce(&perimetro,&perimetrototal,1,MPI_FLOAT,MPI_SUM,0,MPI_COMM_WORLD);
+                perimetro=buscartriangulo("triangulos",i,triangulo);
+                 aux=perimetro+aux;
+                 printf("procesador : %d numero de linea %d= %f\n",rank,i,perimetro);
             }
-                
+        MPI_Reduce(&aux,&perimetrototal,1,MPI_REAL,MPI_SUM,0,MPI_COMM_WORLD);
+              
     }
 
 
     MPI_Finalize();
-
-
-    return 0;
 }
