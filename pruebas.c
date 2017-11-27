@@ -1,9 +1,8 @@
-
 //#include "mpi.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#define cantidad_triangulos 9665
+#define cantidad_triangulos 20
 
 
 //el perimetro segun el codigo secuencial debiese ser 37855.906250
@@ -56,15 +55,16 @@ void buscarpuntos(int triangulo, char fichero[], float puntos[2]){
 
 
     
-float buscartriangulo(char fichero[],int linea, int triangulo[3], float perimetro)
+float buscartriangulo(char fichero[],int linea, int triangulo[3])
 {
 
+    float perimetro;
     float puntos1[2];
     float puntos2[2];
     float puntos3[2];
     FILE *datos = fopen(fichero,"r");
     int posicion;
-    posicion=buscarlinea("triangulos",linea); 
+    posicion=buscarlinea("triangulosprueba",linea); 
     // aqui yo me ubico en la linea que deseo del fichero.
     fseek(datos,posicion,SEEK_SET);
     fscanf(datos,"%d %d %d\n",&triangulo[0],&triangulo[1],&triangulo[2]);
@@ -94,7 +94,8 @@ int main(int argc, char **argv)
     int aux=sizeof(triangulosporprocesador);
     while(n<=cantidad_triangulos)
     {
- 	perimetro=buscartriangulo("triangulos",n,triangulo,perimetro);
+    perimetro=buscartriangulo("triangulosprueba",n,triangulo);
+    printf("numero de linea %d= %f\n",n,perimetro);
     n++;
  
     total=total+perimetro;
@@ -109,8 +110,6 @@ printf("%f\n",total);
  
     if(rank == 0)
     {
-
-
     }
     */
    
